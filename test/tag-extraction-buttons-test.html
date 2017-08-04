@@ -1,0 +1,442 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../tag-extraction-buttons.html">
+</head>
+
+<body>
+  <test-fixture id="tag-extraction-buttons-fixture">
+    <template>
+      <tag-extraction-buttons></tag-extraction-buttons>
+    </template>
+  </test-fixture>
+
+  <script>
+    /* globals suite, test, expect, setup, fixture, flush */
+    /* jshint -W030 */
+    suite('<tag-extraction-buttons> unit tests with no properties', function() {
+      var element;
+
+      setup(function(done) {
+        element = fixture('tag-extraction-buttons-fixture');
+        flush(done);
+      });
+
+      test('properties are set as expected', function() {
+        expect(element.classification).to.deep.equal({});
+        expect(element.entityId).to.equal('');
+        expect(element.entityType).to.equal('ad');
+        expect(element.extractionField).to.equal('');
+        expect(element.extractionKey).to.equal('');
+        expect(element.show).to.be.true;
+        expect(element.tagManager).to.not.exist;
+        expect(element._classificationFromDatabase).to.equal('');
+        expect(element._classificationFromUser).to.equal('');
+        expect(element._listenerId).to.equal(-1);
+      });
+
+      test('does have elements', function() {
+        expect(element.$$('paper-icon-button[id="negativeIcon"]')).to.exist;
+        expect(element.$$('paper-icon-button[id="negativeIcon"]').title).to.equal('Toggle Incorrect Extraction');
+        expect(element.$$('paper-icon-button[id="negativeIcon"]').icon).to.equal('fa:circle-o');
+        expect(element.$$('paper-icon-button[id="positiveIcon"]')).to.exist;
+        expect(element.$$('paper-icon-button[id="positiveIcon"]').title).to.equal('Toggle Correct Extraction');
+        expect(element.$$('paper-icon-button[id="positiveIcon"]').icon).to.equal('fa:circle-o');
+      });
+
+      test('_getIcon does return as expected', function() {
+        expect(element._getIcon('negative', '', '')).to.equal('fa:circle-o');
+        expect(element._getIcon('positive', '', '')).to.equal('fa:circle-o');
+
+        expect(element._getIcon('negative', 'negative', '')).to.equal('fa:circle');
+        expect(element._getIcon('positive', 'negative', '')).to.equal('fa:circle-o');
+        expect(element._getIcon('negative', 'positive', '')).to.equal('fa:circle-o');
+        expect(element._getIcon('positive', 'positive', '')).to.equal('fa:circle');
+
+        expect(element._getIcon('negative', '', 'negative')).to.equal('fa:times-circle-o');
+        expect(element._getIcon('positive', '', 'negative')).to.equal('fa:circle-o');
+        expect(element._getIcon('negative', '', 'positive')).to.equal('fa:circle-o');
+        expect(element._getIcon('positive', '', 'positive')).to.equal('fa:check-circle-o');
+
+        // True positive/negative
+        expect(element._getIcon('negative', 'negative', 'negative')).to.equal('fa:times-circle');
+        expect(element._getIcon('positive', 'negative', 'negative')).to.equal('fa:circle-o');
+        expect(element._getIcon('negative', 'positive', 'positive')).to.equal('fa:circle-o');
+        expect(element._getIcon('positive', 'positive', 'positive')).to.equal('fa:check-circle');
+
+        // False positive/negative
+        expect(element._getIcon('negative', 'negative', 'positive')).to.equal('fa:circle');
+        expect(element._getIcon('negative', 'positive', 'negative')).to.equal('fa:times-circle-o');
+        expect(element._getIcon('positive', 'negative', 'positive')).to.equal('fa:check-circle-o');
+        expect(element._getIcon('positive', 'positive', 'negative')).to.equal('fa:circle');
+      });
+
+      test('setTag does set _classificationFromUser, _classificationFromDatabase, and classification', function() {
+        element.setTag('myDatabaseClassification', 'myUserClassification', 'myEntityId', 'myEntityType', 'myExtractionField', 'myExtractionKey');
+
+        expect(element.classification).to.deep.equal({
+          database: 'myDatabaseClassification',
+          type: 'myExtractionField',
+          user: 'myUserClassification'
+        });
+        expect(element._classificationFromDatabase).to.equal('myDatabaseClassification');
+        expect(element._classificationFromUser).to.equal('myUserClassification');
+      });
+
+      test('setTag does overwrite classification', function() {
+        element.classification = {
+          database: 'previousDatabaseClassification',
+          type: 'previousType',
+          user: 'previousUserClassification'
+        };
+        element._classificationFromUser = 'previousClassification';
+
+        element.setTag('myDatabaseClassification', 'myUserClassification', 'myEntityId', 'myEntityType', 'myExtractionField', 'myExtractionKey');
+        expect(element.classification).to.deep.equal({
+          database: 'myDatabaseClassification',
+          type: 'myExtractionField',
+          user: 'myUserClassification'
+        });
+        expect(element._classificationFromDatabase).to.equal('myDatabaseClassification');
+        expect(element._classificationFromUser).to.equal('myUserClassification');
+      });
+
+      test('setTag does reset classification', function() {
+        element.classification = {
+          database: 'previousDatabaseClassification',
+          type: 'previousType',
+          user: 'previousUserClassification'
+        };
+        element._classificationFromUser = 'previousClassification';
+
+        element.setTag('', '', '', '', '', '');
+        expect(element.classification).to.deep.equal({
+          database: '',
+          type: '',
+          user: ''
+        });
+        expect(element._classificationFromDatabase).to.equal('');
+        expect(element._classificationFromUser).to.equal('');
+      });
+
+      test('_toggleNegative does update classification and set _classificationFromUser to negative', function() {
+        element._toggleNegative();
+        expect(element.classification).to.deep.equal({
+          database: '',
+          type: undefined,
+          user: 'negative'
+        });
+        expect(element._classificationFromUser).to.equal('negative');
+      });
+
+      test('_toggleNegative does update classification and unset _classificationFromUser from negative', function() {
+        element.classification = {
+          database: '',
+          type: undefined,
+          user: 'negative'
+        };
+        element._classificationFromUser = 'negative';
+
+        element._toggleNegative();
+        expect(element.classification).to.deep.equal({
+          database: '',
+          type: undefined,
+          user: ''
+        });
+        expect(element._classificationFromUser).to.equal('');
+      });
+
+      test('_toggleNegative does save classification database and type properties', function() {
+        element.classification = {
+          database: 'positive',
+          type: 'myType',
+          user: ''
+        };
+
+        element._toggleNegative();
+        expect(element.classification).to.deep.equal({
+          database: 'positive',
+          type: 'myType',
+          user: 'negative'
+        });
+      });
+
+      test('_togglePositive does update classification and set _classificationFromUser to positive', function() {
+        element._togglePositive();
+        expect(element.classification).to.deep.equal({
+          database: '',
+          type: undefined,
+          user: 'positive'
+        });
+        expect(element._classificationFromUser).to.equal('positive');
+      });
+
+      test('_togglePositive does update classification and unset _classificationFromUser from positive', function() {
+        element.classification = {
+          database: '',
+          type: undefined,
+          user: 'positive'
+        };
+        element._classificationFromUser = 'positive';
+
+        element._togglePositive();
+        expect(element.classification).to.deep.equal({
+          database: '',
+          type: undefined,
+          user: ''
+        });
+        expect(element._classificationFromUser).to.equal('');
+      });
+
+      test('_togglePositive does save classification database and type properties', function() {
+        element.classification = {
+          database: 'negative',
+          type: 'myType',
+          user: ''
+        };
+
+        element._togglePositive();
+        expect(element.classification).to.deep.equal({
+          database: 'negative',
+          type: 'myType',
+          user: 'positive'
+        });
+      });
+    });
+
+    suite('<tag-extraction-buttons> property observers unit tests', function() {
+      var element;
+
+      setup(function(done) {
+        element = fixture('tag-extraction-buttons-fixture');
+        element.classification = {
+          database: 'classification1',
+          type: 'type1',
+          user: 'classification2'
+        };
+        flush(done);
+      });
+
+      test('setting classification does set _classificationFromDatabase and _classificationFromUser', function() {
+        expect(element._classificationFromDatabase).to.equal('classification1');
+        expect(element._classificationFromUser).to.equal('classification2');
+      });
+
+      test('setting classification property does update _classificationFromDatabase and _classificationFromUser', function() {
+        element.set('classification', {
+          database: 'classification3',
+          type: 'type2',
+          user: 'classification4'
+        });
+        expect(element._classificationFromDatabase).to.equal('classification3');
+        expect(element._classificationFromUser).to.equal('classification4');
+      });
+
+      test('changing classification does update _classificationFromDatabase and _classificationFromUser', function() {
+        element.classification = {
+          database: 'classification3',
+          type: 'type2',
+          user: 'classification4'
+        };
+        expect(element._classificationFromDatabase).to.equal('classification3');
+        expect(element._classificationFromUser).to.equal('classification4');
+      });
+
+      test('resetting classification does unset _classificationFromDatabase and _classificationFromUser', function() {
+        element.classification = {};
+        expect(element._classificationFromDatabase).to.equal('');
+        expect(element._classificationFromUser).to.equal('');
+      });
+    });
+
+    suite('<tag-extraction-buttons> unit tests with properties', function() {
+      var element;
+
+      setup(function(done) {
+        element = fixture('tag-extraction-buttons-fixture');
+        element.classification = {
+          database: 'positive',
+          type: ''
+        };
+        element.entityId = 'testEntityId';
+        element.entityType = 'testEntityType';
+        element.extractionField = 'testExtractionField';
+        element.extractionKey = 'testExtractionKey';
+        flush(done);
+      });
+
+      test('properties are set as expected', function() {
+        expect(element.classification).to.deep.equal({
+          database: 'positive',
+          type: ''
+        });
+        expect(element.entityId).to.equal('testEntityId');
+        expect(element.entityType).to.equal('testEntityType');
+        expect(element.extractionField).to.equal('testExtractionField');
+        expect(element.extractionKey).to.equal('testExtractionKey');
+        expect(element._classificationFromDatabase).to.equal('positive');
+        expect(element._classificationFromUser).to.equal('');
+        expect(element._listenerId).to.equal(-1);
+        expect(element.show).to.be.true;
+      });
+
+      test('does have elements', function() {
+        expect(element.$$('paper-icon-button[id="negativeIcon"]')).to.exist;
+        expect(element.$$('paper-icon-button[id="negativeIcon"]').icon).to.equal('fa:circle-o');
+        expect(element.$$('paper-icon-button[id="positiveIcon"]')).to.exist;
+        expect(element.$$('paper-icon-button[id="positiveIcon"]').icon).to.equal('fa:circle');
+      });
+
+      test('changing classification does update icon styling', function(done) {
+        element.classification = {
+          database: 'negative',
+          type: ''
+        };
+        flush(function() {
+          expect(element.$$('paper-icon-button[id="negativeIcon"]')).to.exist;
+          expect(element.$$('paper-icon-button[id="negativeIcon"]').icon).to.equal('fa:circle');
+          expect(element.$$('paper-icon-button[id="positiveIcon"]')).to.exist;
+          expect(element.$$('paper-icon-button[id="positiveIcon"]').icon).to.equal('fa:circle-o');
+          done();
+        });
+      });
+
+      test('changing _classificationFromDatabase does update icon styling', function(done) {
+        element._classificationFromDatabase = 'negative';
+        flush(function() {
+          expect(element.$$('paper-icon-button[id="negativeIcon"]')).to.exist;
+          expect(element.$$('paper-icon-button[id="negativeIcon"]').icon).to.equal('fa:circle');
+          expect(element.$$('paper-icon-button[id="positiveIcon"]')).to.exist;
+          expect(element.$$('paper-icon-button[id="positiveIcon"]').icon).to.equal('fa:circle-o');
+          done();
+        });
+      });
+
+      test('changing _classificationFromUser does update icon styling', function(done) {
+        element._classificationFromUser = 'negative';
+        flush(function() {
+          expect(element.$$('paper-icon-button[id="negativeIcon"]')).to.exist;
+          expect(element.$$('paper-icon-button[id="negativeIcon"]').icon).to.equal('fa:times-circle-o');
+          expect(element.$$('paper-icon-button[id="positiveIcon"]')).to.exist;
+          expect(element.$$('paper-icon-button[id="positiveIcon"]').icon).to.equal('fa:circle');
+          done();
+        });
+      });
+
+      test('setting tagManager does call tagManager.addListener', function(done) {
+        element.tagManager = {
+          addListener: function(showListener) {
+            expect(showListener).to.be.a('Function');
+            showListener(false);
+            expect(element.show).to.be.false;
+            done();
+          }
+        };
+      });
+
+      test('setting tagManager does set listenerId', function() {
+        element.tagManager = {
+          addListener: function() {
+            return 123;
+          }
+        };
+
+        expect(element._listenerId).to.equal(123);
+      });
+
+      test('setTag does call tagManager.setExtractionTag', function(done) {
+        element.tagManager = {
+          setExtractionTag: function(classification, entityId, entityType, extractionField, extractionKey) {
+            expect(classification).to.equal('positive');
+            expect(entityId).to.equal('myEntityId');
+            expect(entityType).to.equal('myEntityType');
+            expect(extractionField).to.equal('myExtractionField');
+            expect(extractionKey).to.equal('myExtractionKey');
+            expect(element._classificationFromUser).to.equal('positive');
+            done();
+          }
+        };
+        element.setTag('negative', 'positive', 'myEntityId', 'myEntityType', 'myExtractionField', 'myExtractionKey');
+      });
+
+      test('_toggleNegative does call tagManager.setExtractionTag', function(done) {
+        element.tagManager = {
+          setExtractionTag: function(classification, entityId, entityType, extractionField, extractionKey) {
+            expect(classification).to.equal('negative');
+            expect(entityId).to.equal('testEntityId');
+            expect(entityType).to.equal('testEntityType');
+            expect(extractionField).to.equal('testExtractionField');
+            expect(extractionKey).to.equal('testExtractionKey');
+            expect(element._classificationFromUser).to.equal('negative');
+            done();
+          }
+        };
+        element._toggleNegative();
+      });
+
+      test('_togglePositive does call tagManager.setExtractionTag', function(done) {
+        element.tagManager = {
+          setExtractionTag: function(classification, entityId, entityType, extractionField, extractionKey) {
+            expect(classification).to.equal('positive');
+            expect(entityId).to.equal('testEntityId');
+            expect(entityType).to.equal('testEntityType');
+            expect(extractionField).to.equal('testExtractionField');
+            expect(extractionKey).to.equal('testExtractionKey');
+            expect(element._classificationFromUser).to.equal('positive');
+            done();
+          }
+        };
+        element._togglePositive();
+      });
+    });
+
+    suite('<tag-extraction-buttons> no-show unit tests', function() {
+      var element;
+
+      setup(function(done) {
+        element = fixture('tag-extraction-buttons-fixture');
+        element.show = false;
+        element.classification = {
+          database: 'positive',
+          type: ''
+        };
+        flush(done);
+      });
+
+      test('properties are set as expected', function() {
+        expect(element.classification).to.deep.equal({
+          database: 'positive',
+          type: ''
+        });
+        expect(element._classificationFromDatabase).to.equal('positive');
+        expect(element._classificationFromUser).to.equal('');
+        expect(element.show).to.be.false;
+      });
+
+      test('does not have elements because show is false', function() {
+        expect(element.$$('paper-icon-button[id="negativeIcon"]')).to.not.exist;
+        expect(element.$$('paper-icon-button[id="positiveIcon"]')).to.not.exist;
+      });
+    });
+  </script>
+</body>
+</html>

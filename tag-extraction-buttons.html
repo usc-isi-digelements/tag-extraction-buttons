@@ -1,0 +1,363 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../fontawesome-iconset/fa-all.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-styles/color.html">
+
+<!--
+A Polymer Element showing buttons to classify an extraction as either positive (correct) or negative (incorrect).
+
+### Example
+```js
+var classification = {
+  database: 'positive',
+  type: 'ad',
+  user: ''
+};
+```
+
+```html
+<tag-manager tag-manager="{{tagManager}}"></tag-manager>
+<tag-extraction-buttons
+  classification="[[classification]]"
+  tag-manager="[[tagManager]]">
+</tag-extraction-buttons>
+```
+
+### Styling
+
+`<tag-extraction-buttons>` provides the following custom properties and mixins for styling:
+
+Custom property                     | Description                                       | Default
+------------------------------------|---------------------------------------------------|--------
+`--tag-button-color`                | The color of the untagged buttons.                | paper-grey-600
+`--tag-button-negative-color`       | The color of the negatively tagged buttons.       | paper-red-600
+`--tag-button-negative-hover-color` | The hover color of the negatively tagged buttons. | paper-red-900
+`--tag-button-positive-color`       | The color of the positively tagged buttons.       | paper-green-600
+`--tag-button-positive-hover-color` | The hover color of the positively tagged buttons. | paper-green-900
+
+@demo demo/index.html
+-->
+
+
+<dom-module id="tag-extraction-buttons">
+  <template>
+    <style include="iron-flex iron-flex-alignment"></style>
+
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-icon-button {
+        color: var(--tag-button-color, --paper-grey-600);
+        margin: 0 2px;
+        --paper-icon-button: {
+          height: 20px;
+          width: 20px;
+          padding: 0;
+        };
+      }
+
+      #negativeIcon {
+        color: var(--tag-button-negative-color, --paper-red-600);
+      }
+
+      #positiveIcon {
+        color: var(--tag-button-positive-color, --paper-green-600);
+      }
+
+      #negativeIcon:hover {
+        color: var(--tag-button-negative-hover-color, --paper-red-900);
+      }
+
+      #positiveIcon:hover {
+        color: var(--tag-button-positive-hover-color, --paper-green-900);
+      }
+    </style>
+
+    <template is="dom-if" if="[[show]]">
+      <div class="layout horizontal center">
+        <paper-icon-button id="negativeIcon"
+          icon="[[_getIcon('negative', _classificationFromDatabase, _classificationFromUser)]]"
+          title="Toggle Incorrect Extraction"
+          on-tap="_toggleNegative">
+        </paper-icon-button>
+
+        <paper-icon-button id="positiveIcon"
+          icon="[[_getIcon('positive', _classificationFromDatabase, _classificationFromUser)]]"
+          title="Toggle Correct Extraction"
+          on-tap="_togglePositive">
+        </paper-icon-button>
+      </div>
+    </template>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'tag-extraction-buttons',
+
+      properties: {
+        /**
+         * (Optional|Output)
+         *
+         * The classification object that contains `database`, `type`, and `user` properties.
+         *
+         * @type {Object}
+         * @default {}
+         */
+        classification: {
+          notify: true,
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The entity ID.
+         *
+         * @type {String}
+         * @default ''
+         */
+        entityId: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The entity type.
+         *
+         * @type {String}
+         * @default 'ad'
+         */
+        entityType: {
+          type: String,
+          value: 'ad'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The extraction field.
+         *
+         * @type {String}
+         * @default ''
+         */
+        extractionField: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The extraction key.
+         *
+         * @type {String}
+         * @default ''
+         */
+        extractionKey: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional|Output)
+         *
+         * Whether to show the buttons.
+         *
+         * @type {Boolean}
+         * @default true
+         */
+        show: {
+          type: Boolean,
+          value: true
+        },
+
+        /**
+         * (Required)
+         *
+         * The tag manager object with the following callbacks:
+         * - `addListener`
+         * - `removeListener`
+         * - `setExtractionTag`
+         *
+         * @type {Object}
+         */
+        tagManager: {
+          observer: '_addListenerToTagManager',
+          type: Object
+        },
+
+        /**
+         * The classification from the `database` property of the `classification` property.
+         *
+         * @type {String}
+         * @default ''
+         * @private
+         */
+        _classificationFromDatabase: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The classification from the `user` property of the `classification` property.
+         *
+         * @type {String}
+         * @default ''
+         * @private
+         */
+        _classificationFromUser: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The listener ID.
+         *
+         * @type {Number}
+         * @default -1
+         * @private
+         */
+        _listenerId: {
+          type: Number,
+          value: -1
+        }
+      },
+
+      observers: [
+        '_handleDataChange(classification, classification.*)'
+      ],
+
+      detached: function() {
+        if(this.tagManager && this.tagManager.removeListener && this._listenerId >= 0) {
+          this.tagManager.removeListener(this._listenerId);
+        }
+      },
+
+      /**
+       * Adds a show listener to the tag manager.
+       *
+       * @private
+       */
+      _addListenerToTagManager: function() {
+        if(this.tagManager && this.tagManager.addListener) {
+          var self = this;
+          var showListener = function(show) {
+            self.set('show', show);
+          };
+          this._listenerId = this.tagManager.addListener(showListener);
+        }
+      },
+
+      /**
+       * Returns the classification icon.
+       *
+       * @param {String} type
+       * @param {String} classificationFromDatabase
+       * @param {String} classificationFromUser
+       * @return {String}
+       * @private
+       */
+      _getIcon: function(type, classificationFromDatabase, classificationFromUser) {
+        if(!classificationFromDatabase && classificationFromUser === type) {
+          return type === 'positive' ? 'fa:check-circle-o' : 'fa:times-circle-o';
+        }
+        if(classificationFromDatabase === type && !classificationFromUser) {
+          return 'fa:circle';
+        }
+        if(classificationFromDatabase && classificationFromUser) {
+          // True positive/negative.
+          if(classificationFromDatabase === classificationFromUser) {
+            return classificationFromUser === type ? (type === 'positive' ? 'fa:check-circle' : 'fa:times-circle') : 'fa:circle-o';
+          }
+          // False positive/negative.
+          return classificationFromUser === type ? (type === 'positive' ? 'fa:check-circle-o' : 'fa:times-circle-o') : 'fa:circle';
+        }
+        return 'fa:circle-o';
+      },
+
+      /**
+       * Updates the classification properties
+       *
+       * @private
+       */
+      _handleDataChange: function() {
+        var classification = this.classification || {};
+        this.set('_classificationFromDatabase', classification.database || '');
+        this.set('_classificationFromUser', classification.user || '');
+      },
+
+      /**
+       * Toggles the user's negative (incorrect) classification.
+       *
+       * @private
+       */
+      _toggleNegative: function() {
+        var databaseClassification = this.classification.database || '';
+        var userClassification = (this._classificationFromUser === 'negative' ? '' : 'negative');
+        var extractionField = this.extractionField || this.classification.type;
+        this.setTag(databaseClassification, userClassification, this.entityId, this.entityType, extractionField, this.extractionKey);
+      },
+
+      /**
+       * Toggles the user's positive (correct) classification.
+       *
+       * @private
+       */
+      _togglePositive: function() {
+        var databaseClassification = this.classification.database || '';
+        var userClassification = (this._classificationFromUser === 'positive' ? '' : 'positive');
+        var extractionField = this.extractionField || this.classification.type;
+        this.setTag(databaseClassification, userClassification, this.entityId, this.entityType, extractionField, this.extractionKey);
+      },
+
+      /**
+       * Sets the given classifications for the extraction with the given field/key for the entity with the given ID/type.
+       *
+       * @param {String} databaseClassification Either 'positive', 'negative', or ''.
+       * @param {String} userClassification Either 'positive', 'negative', or ''.
+       * @param {String} entityId
+       * @param {String} entityType
+       * @param {String} extractionField
+       * @param {String} extractionKey
+       */
+      setTag: function(databaseClassification, userClassification, entityId, entityType, extractionField, extractionKey) {
+        this.set('classification', {
+          database: databaseClassification,
+          type: extractionField,
+          user: userClassification
+        });
+        if(this.tagManager && this.tagManager.setExtractionTag) {
+          this.tagManager.setExtractionTag(userClassification, entityId, entityType, extractionField, extractionKey);
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

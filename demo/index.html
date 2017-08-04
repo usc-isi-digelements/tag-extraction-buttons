@@ -1,0 +1,141 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <link rel="import" href="../tag-extraction-buttons.html">
+</head>
+
+<body unresolved>
+  <template is="dom-bind" id="demo">
+    <p>======= INPUT =======</p>
+    <p>Entity ID:  testEntityId</p>
+    <p>Entity Type:  testEntityType</p>
+    <p>Extraction Field:  testExtractionField</p>
+    <p>Extraction Key:  testExtractionKey</p>
+
+    <p>===== ELEMENT 1 =====</p>
+    <p>Classification:  [[stringify(classification1)]]</p>
+    <p>Arguments of setEntityTag: [[stringify(args1)]]</p>
+
+    <tag-extraction-buttons
+      classification="[[classification1]]"
+      entity-id="testEntityId"
+      entity-type="testEntityType"
+      extraction-field="testExtractionField"
+      extraction-key="testExtractionKey"
+      tag-manager="[[tagManager1]]">
+    </tag-extraction-buttons>
+
+    <p>===== ELEMENT 2 =====</p>
+    <p>Classification:  [[stringify(classification2)]]</p>
+    <p>Arguments of setEntityTag: [[stringify(args2)]]</p>
+
+    <tag-extraction-buttons
+      classification="[[classification2]]"
+      entity-id="testEntityId"
+      entity-type="testEntityType"
+      extraction-field="testExtractionField"
+      extraction-key="testExtractionKey"
+      tag-manager="[[tagManager2]]">
+    </tag-extraction-buttons>
+
+    <p>===== ELEMENT 3 =====</p>
+    <p>Classification:  [[stringify(classification3)]]</p>
+    <p>Arguments of setEntityTag: [[stringify(args3)]]</p>
+
+    <tag-extraction-buttons
+      classification="[[classification3]]"
+      entity-id="testEntityId"
+      entity-type="testEntityType"
+      extraction-field="testExtractionField"
+      extraction-key="testExtractionKey"
+      tag-manager="[[tagManager3]]">
+    </tag-extraction-buttons>
+  </template>
+
+  <script>
+    (function(document) {
+      var demo = document.querySelector('#demo');
+
+      demo.args1 = {};
+      demo.args2 = {};
+      demo.args3 = {};
+      demo.classification1 = {
+        database: '',
+        type: '',
+        user: ''
+      };
+      demo.classification2 = {
+        database: 'positive',
+        type: '',
+        user: ''
+      };
+      demo.classification3 = {
+        database: 'negative',
+        type: '',
+        user: ''
+      };
+      demo.tagManager1 = {
+        addListener: function() {},
+        removeListener: function() {},
+        setExtractionTag: function(classification, entityId, entityType, extractionField, extractionKey) {
+          demo.set('args1', {
+            classification: classification,
+            entityId: entityId,
+            entityType: entityType,
+            extractionField: extractionField,
+            extractionKey: extractionKey
+          });
+        }
+      };
+      demo.tagManager2 = {
+        addListener: function() {},
+        removeListener: function() {},
+        setExtractionTag: function(classification, entityId, entityType, extractionField, extractionKey) {
+          demo.set('args2', {
+            classification: classification,
+            entityId: entityId,
+            entityType: entityType,
+            extractionField: extractionField,
+            extractionKey: extractionKey
+          });
+        }
+      };
+      demo.tagManager3 = {
+        addListener: function() {},
+        removeListener: function() {},
+        setExtractionTag: function(classification, entityId, entityType, extractionField, extractionKey) {
+          demo.set('args3', {
+            classification: classification,
+            entityId: entityId,
+            entityType: entityType,
+            extractionField: extractionField,
+            extractionKey: extractionKey
+          });
+        }
+      };
+
+      demo.stringify = function(object) {
+        return JSON.stringify(object);
+      };
+    })(document);
+  </script>
+</body>
+</html>
