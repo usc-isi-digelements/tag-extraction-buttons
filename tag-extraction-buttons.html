@@ -93,19 +93,21 @@ Custom property                     | Description                               
     </style>
 
     <template is="dom-if" if="[[show]]">
-      <div class="layout horizontal center">
-        <paper-icon-button id="negativeIcon"
-          icon="[[_getIcon('negative', _classificationFromDatabase, _classificationFromUser)]]"
-          title="Toggle Incorrect Extraction"
-          on-tap="_toggleNegative">
-        </paper-icon-button>
+      <template is="dom-if" if="[[classification]]">
+        <div class="layout horizontal center">
+          <paper-icon-button id="negativeIcon"
+            icon="[[_getIcon('negative', _classificationFromDatabase, _classificationFromUser)]]"
+            title="Toggle Incorrect Extraction"
+            on-tap="_toggleNegative">
+          </paper-icon-button>
 
-        <paper-icon-button id="positiveIcon"
-          icon="[[_getIcon('positive', _classificationFromDatabase, _classificationFromUser)]]"
-          title="Toggle Correct Extraction"
-          on-tap="_togglePositive">
-        </paper-icon-button>
-      </div>
+          <paper-icon-button id="positiveIcon"
+            icon="[[_getIcon('positive', _classificationFromDatabase, _classificationFromUser)]]"
+            title="Toggle Correct Extraction"
+            on-tap="_togglePositive">
+          </paper-icon-button>
+        </div>
+      </template>
     </template>
   </template>
 
