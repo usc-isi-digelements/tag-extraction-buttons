@@ -55,7 +55,6 @@ Custom property                     | Description                               
 @demo demo/index.html
 -->
 
-
 <dom-module id="tag-extraction-buttons">
   <template>
     <style include="iron-flex iron-flex-alignment"></style>
@@ -66,7 +65,7 @@ Custom property                     | Description                               
       }
 
       paper-icon-button {
-        color: var(--tag-button-color, --paper-grey-600);
+        color: var(--tag-button-color, var(--paper-grey-600));
         margin: 0 2px;
         --paper-icon-button: {
           height: 20px;
@@ -76,19 +75,19 @@ Custom property                     | Description                               
       }
 
       #negativeIcon {
-        color: var(--tag-button-negative-color, --paper-red-600);
+        color: var(--tag-button-negative-color, var(--paper-red-600));
       }
 
       #positiveIcon {
-        color: var(--tag-button-positive-color, --paper-green-600);
+        color: var(--tag-button-positive-color, var(--paper-green-600));
       }
 
       #negativeIcon:hover {
-        color: var(--tag-button-negative-hover-color, --paper-red-900);
+        color: var(--tag-button-negative-hover-color, var(--paper-red-900));
       }
 
       #positiveIcon:hover {
-        color: var(--tag-button-positive-hover-color, --paper-green-900);
+        color: var(--tag-button-positive-hover-color, var(--paper-green-900));
       }
     </style>
 

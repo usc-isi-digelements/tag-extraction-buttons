@@ -18,57 +18,65 @@ limitations under the License.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="../tag-extraction-buttons.html">
 </head>
 
 <body unresolved>
-  <template is="dom-bind" id="demo">
-    <p>======= INPUT =======</p>
-    <p>Entity ID:  testEntityId</p>
-    <p>Entity Type:  testEntityType</p>
-    <p>Extraction Field:  testExtractionField</p>
-    <p>Extraction Key:  testExtractionKey</p>
+  <dom-bind id="demo">
+    <template is="dom-bind">
+      <p>======= INPUT =======</p>
+      <p>Entity ID:  testEntityId</p>
+      <p>Entity Type:  testEntityType</p>
+      <p>Extraction Field:  testExtractionField</p>
+      <p>Extraction Key:  testExtractionKey</p>
 
-    <p>===== ELEMENT 1 =====</p>
-    <p>Classification:  [[stringify(classification1)]]</p>
-    <p>Arguments of setEntityTag: [[stringify(args1)]]</p>
+      <p>===== ELEMENT 1 =====</p>
+      <template is="dom-if" if="[[stringify]]">
+        <p>Classification:  [[stringify(classification1)]]</p>
+        <p>Arguments of setEntityTag: [[stringify(args1)]]</p>
+      </template>
 
-    <tag-extraction-buttons
-      classification="[[classification1]]"
-      entity-id="testEntityId"
-      entity-type="testEntityType"
-      extraction-field="testExtractionField"
-      extraction-key="testExtractionKey"
-      tag-manager="[[tagManager1]]">
-    </tag-extraction-buttons>
+      <tag-extraction-buttons
+        classification="[[classification1]]"
+        entity-id="testEntityId"
+        entity-type="testEntityType"
+        extraction-field="testExtractionField"
+        extraction-key="testExtractionKey"
+        tag-manager="[[tagManager1]]">
+      </tag-extraction-buttons>
 
-    <p>===== ELEMENT 2 =====</p>
-    <p>Classification:  [[stringify(classification2)]]</p>
-    <p>Arguments of setEntityTag: [[stringify(args2)]]</p>
+      <p>===== ELEMENT 2 =====</p>
+      <template is="dom-if" if="[[stringify]]">
+        <p>Classification:  [[stringify(classification2)]]</p>
+        <p>Arguments of setEntityTag: [[stringify(args2)]]</p>
+      </template>
 
-    <tag-extraction-buttons
-      classification="[[classification2]]"
-      entity-id="testEntityId"
-      entity-type="testEntityType"
-      extraction-field="testExtractionField"
-      extraction-key="testExtractionKey"
-      tag-manager="[[tagManager2]]">
-    </tag-extraction-buttons>
+      <tag-extraction-buttons
+        classification="[[classification2]]"
+        entity-id="testEntityId"
+        entity-type="testEntityType"
+        extraction-field="testExtractionField"
+        extraction-key="testExtractionKey"
+        tag-manager="[[tagManager2]]">
+      </tag-extraction-buttons>
 
-    <p>===== ELEMENT 3 =====</p>
-    <p>Classification:  [[stringify(classification3)]]</p>
-    <p>Arguments of setEntityTag: [[stringify(args3)]]</p>
+      <p>===== ELEMENT 3 =====</p>
+      <template is="dom-if" if="[[stringify]]">
+        <p>Classification:  [[stringify(classification3)]]</p>
+        <p>Arguments of setEntityTag: [[stringify(args3)]]</p>
+      </template>
 
-    <tag-extraction-buttons
-      classification="[[classification3]]"
-      entity-id="testEntityId"
-      entity-type="testEntityType"
-      extraction-field="testExtractionField"
-      extraction-key="testExtractionKey"
-      tag-manager="[[tagManager3]]">
-    </tag-extraction-buttons>
-  </template>
+      <tag-extraction-buttons
+        classification="[[classification3]]"
+        entity-id="testEntityId"
+        entity-type="testEntityType"
+        extraction-field="testExtractionField"
+        extraction-key="testExtractionKey"
+        tag-manager="[[tagManager3]]">
+      </tag-extraction-buttons>
+    </template>
+  </dom-bind>
 
   <script>
     (function(document) {
