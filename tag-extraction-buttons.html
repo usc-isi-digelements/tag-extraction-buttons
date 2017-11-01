@@ -67,12 +67,15 @@ Custom property                     | Description                               
 
       paper-icon-button {
         color: var(--tag-button-color, var(--paper-grey-600));
-        margin: 0 2px;
         --paper-icon-button: {
           height: 20px;
           width: 20px;
           padding: 0;
         };
+      }
+
+      paper-icon-button:first-child {
+        margin-right: 5px;
       }
 
       #negativeIcon {
