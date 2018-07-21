@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "keywords": ["web-component", "polymer"],
   "main": "tag-extraction-buttons.html",
-  "homepage": "https://github.com/DigElements/tag-extraction-buttons/",
+  "homepage": "https://github.com/usc-isi-digelements/tag-extraction-buttons/",
   "ignore": ["/.*", "/test/"],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
